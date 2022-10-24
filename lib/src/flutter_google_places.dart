@@ -1,6 +1,7 @@
 library flutter_google_places.src;
 
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:google_api_headers/google_api_headers.dart';
@@ -429,25 +430,28 @@ abstract class PlacesAutocompleteState extends State<PlacesAutocompleteWidget> {
       setState(() {
         _searching = true;
       });
+      try {
+        final res = await _places!.autocomplete(
+          value,
+          offset: widget.offset,
+          location: widget.location,
+          radius: widget.radius,
+          language: widget.language,
+          sessionToken: widget.sessionToken,
+          types: widget.types ?? [],
+          components: widget.components ?? [],
+          strictbounds: widget.strictbounds ?? false,
+          region: widget.region,
+        );
 
-      final res = await _places!.autocomplete(
-        value,
-        offset: widget.offset,
-        location: widget.location,
-        radius: widget.radius,
-        language: widget.language,
-        sessionToken: widget.sessionToken,
-        types: widget.types ?? [],
-        components: widget.components ?? [],
-        strictbounds: widget.strictbounds ?? false,
-        region: widget.region,
-      );
-
-      if (res.errorMessage?.isNotEmpty == true ||
-          res.status == "REQUEST_DENIED") {
-        onResponseError(res);
-      } else {
-        onResponse(res);
+        if (res.errorMessage?.isNotEmpty == true ||
+            res.status == "REQUEST_DENIED") {
+          onResponseError(res);
+        } else {
+          onResponse(res);
+        }
+      } catch (e) {
+        log("Error while searching results...", name: "flutter_google_places");
       }
     } else {
       onResponse(null);
